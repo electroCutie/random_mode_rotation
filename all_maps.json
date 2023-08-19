@@ -1,0 +1,435 @@
+[
+    {
+        "name": "PlayField",
+        "gid": 0,
+        "variants": [
+            { "id": 0, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "SteelCage",
+        "gid": 1,
+        "variants": [
+            { "id": 1, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Galleon EX",
+        "gid": 2,
+        "variants": [
+            { "id": 2, "mode": "TD", "players": 16 },
+            { "id": 3, "mode": "Chaser", "players": 16 }
+        ]
+    },{
+        "name": "Bladecity",
+        "gid": 3,
+        "variants": [
+            { "id": 4, "mode": "TD", "players": 16 },
+            { "id": 5, "mode": "Siege", "players": 16 }
+        ]
+    },{
+        "name": "Ironheart",
+        "gid": 4,
+        "variants": [
+            { "id": 6, "mode": "TD", "players": 16 },
+            { "id": 7, "mode": "Siege", "players": 16 }
+        ]
+    },{
+        "name": "Neden-1",
+        "gid": 5,
+        "variants": [
+            { "id": 8, "mode": "TD", "players": 16 },
+            { "id": 9, "mode": "DM", "players": 12 },
+            { "id": 10, "mode": "DM", "players": 12, "nickname": "Neden J" },
+            { "id": 11, "mode": "Captain", "players": 16 }
+        ]
+    },{
+        "name": "City Square",
+        "gid": 6,
+        "variants": [
+            { "id": 12, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Station-2",
+        "gid": 7,
+        "variants": [
+            { "id": 13, "mode": "TD", "players": 16 },
+            { "id": 14, "mode": "TD", "players": 16, "nickname": "Station-2 [Minecraft]" }
+        ]
+    },{
+        "name": "Max School",
+        "gid": 8,
+        "variants": [
+            { "id": 15, "mode": "TD", "players": 16 },
+            { "id": 16, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "Tunnel-Pro",
+        "gid": 9,
+        "variants": [
+            { "id": 17, "mode": "TD", "players": 16, "gag": true }
+        ]
+    },{
+        "name": "Cyberion",
+        "gid": 10,
+        "variants": [
+            { "id": 18, "mode": "TD", "players": 16 },
+            { "id": 19, "mode": "DM", "players": 16 }
+        ]
+    },{
+        "name": "Sector-R",
+        "gid": 11,
+        "variants": [
+            { "id": 20, "mode": "TD", "players": 16 },
+            { "id": 21, "mode": "Siege", "players": 16 }
+        ]
+    },{
+        "name": "Temple-R",
+        "gid": 12,
+        "variants": [
+            { "id": 22, "mode": "TD", "players": 16 },
+            { "id": 23, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "Ziggurat",
+        "gid": 13,
+        "variants": [
+            { "id": 24, "mode": "TD", "players": 16 },
+            { "id": 25, "mode": "DM", "players": 16 },
+            { "id": 26, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "Neo-Wonder",
+        "gid": 14,
+        "variants": [
+            { "id": 27, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Station-3",
+        "gid": 15,
+        "variants": [
+            { "id": 28, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "IS-06",
+        "gid": 16,
+        "variants": [
+            { "id": 29, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Hyperium",
+        "gid": 17,
+        "variants": [
+            { "id": 30, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Side-3",
+        "gid": 18,
+        "variants": [
+            { "id": 31, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Tunnel",
+        "gid": 19,
+        "variants": [
+            { "id": 32, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Neden-3",
+        "gid": 20,
+        "variants": [
+            { "id": 33, "mode": "TD", "players": 16 },
+            { "id": 34, "mode": "DM", "players": 12 }
+        ]
+    },{
+        "name": "Station-1",
+        "gid": 21,
+        "variants": [
+            { "id": 35, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Highway",
+        "gid": 22,
+        "variants": [
+            { "id": 36, "mode": "TD", "players": 16 },
+            { "id": 37, "mode": "DM", "players": 16 }
+        ]
+    },{
+        "name": "Old School",
+        "gid": 23,
+        "variants": [
+            { "id": 38, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Temple-M",
+        "gid": 24,
+        "variants": [
+            { "id": 39, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Colosseum",
+        "gid": 25,
+        "variants": [
+            { "id": 40, "mode": "TD", "players": 16 }
+        ]
+    },{
+        "name": "Cylot",
+        "gid": 26,
+        "variants": [
+            { "id": 41, "mode": "DM", "players": 10 },
+            { "id": 42, "mode": "Chaser", "players": 12 }
+        ]
+    },{
+        "name": "Beach",
+        "gid": 27,
+        "variants": [
+            { "id": 43, "mode": "DM", "players": 12 },
+            { "id": 44, "mode": "BR", "players": 12 }
+        ]
+    },{
+        "name": "Stadium City",
+        "gid": 28,
+        "variants": [
+            { "id": 45, "mode": "DM", "players": 16 },
+            { "id": 46, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "Airship Cafe",
+        "gid": 29,
+        "variants": [
+            { "id": 47, "mode": "DM", "players": 8 },
+            { "id": 48, "mode": "Chaser", "players": 10 }
+        ]
+    },{
+        "name": "Neden-2",
+        "gid": 30,
+        "variants": [
+            { "id": 49, "mode": "DM", "players": 12 },
+            { "id": 50, "mode": "DM", "players": 16, "nickname": "Neden-2 W" }
+        ]
+    },{
+        "name": "Azit",
+        "gid": 31,
+        "variants": [
+            { "id": 51, "mode": "DM", "players": 8 },
+            { "id": 52, "mode": "DM", "players": 8, "nickname": "Azit-O" }
+        ]
+    },{
+        "name": "Azit-EX",
+        "gid": 32,
+        "variants": [
+            { "id": 53, "mode": "DM", "players": 16 },
+            { "id": 54, "mode": "Captain", "players": 12 }
+        ]
+    },{
+        "name": "Data Harvest",
+        "gid": 33,
+        "variants": [
+            { "id": 55, "mode": "DM", "players": 16 },
+            { "id": 56, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "The Longest Yard",
+        "gid": 34,
+        "variants": [
+            { "id": 57, "mode": "DM", "players": 16 },
+            { "id": 58, "mode": "BR", "players": 16 },
+            { "id": 59, "mode": "Chaser", "players": 16 },
+            { "id": 60, "mode": "Captain", "players": 16 }
+        ]
+    },{
+        "name": "Xenotron Cluster",
+        "gid": 35,
+        "variants": [
+            { "id": 61, "mode": "DM", "players": 16 },
+            { "id": 62, "mode": "BR", "players": 16 },
+            { "id": 106, "mode": "Chaser", "players": 16 }
+        ]
+    },{
+        "name": "OldMoon",
+        "gid": 36,
+        "variants": [
+            { "id": 63, "mode": "DM", "players": 16 },
+            { "id": 64, "mode": "BR", "players": 16 },
+            { "id": 65, "mode": "Captain", "players": 16 }
+        ]
+    },{
+        "name": "OldMoon",
+        "gid": 37,
+        "variants": [
+            { "id": 66, "mode": "Chaser", "players": 16 }
+        ]
+    },{
+        "name": "City Square-2",
+        "gid": 38,
+        "variants": [
+            { "id": 67, "mode": "DM", "players": 16 },
+            { "id": 68, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "Alpha Circle",
+        "gid": 39,
+        "variants": [
+            { "id": 69, "mode": "DM", "players": 16 },
+            { "id": 70, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "Dust 2",
+        "gid": 40,
+        "variants": [
+            { "id": 71, "mode": "DM", "players": 16 },
+            { "id": 105, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "Mansion",
+        "gid": 41,
+        "variants": [
+            { "id": 72, "mode": "DM", "players": 16 }
+        ]
+    },{
+        "name": "Mansion Grounds",
+        "gid": 42,
+        "variants": [
+            { "id": 73, "mode": "DM", "players": 16 },
+            { "id": 74, "mode": "BR", "players": 16 },
+            { "id": 75, "mode": "Chaser", "players": 16 }
+        ]
+    },{
+        "name": "Neden-1 S",
+        "gid": 43,
+        "variants": [
+            { "id": 76, "mode": "DM", "players": 16, "gag": true }
+        ]
+    },{
+        "name": "Warp-Ship",
+        "gid": 44,
+        "variants": [
+            { "id": 77, "mode": "DM", "players": 16 }
+        ]
+    },{
+        "name": "Bio-Lab",
+        "gid": 45,
+        "variants": [
+            { "id": 78, "mode": "DM", "players": 16 }
+        ]
+    },{
+        "name": "Spade A",
+        "gid": 46,
+        "variants": [
+            { "id": 79, "mode": "DM", "players": 16 },
+            { "id": 80, "mode": "Captain", "players": 16 }
+        ]
+    },{
+        "name": "Construction",
+        "gid": 47,
+        "variants": [
+            { "id": 81, "mode": "DM", "players": 16 }
+        ]
+    },{
+        "name": "Square",
+        "gid": 48,
+        "variants": [
+            { "id": 82, "mode": "DM", "players": 16 }
+        ]
+    },{
+        "name": "HoliDay",
+        "gid": 49,
+        "variants": [
+            { "id": 83, "mode": "DM", "players": 12 }
+        ]
+    },{
+        "name": "Neoniac",
+        "gid": 50,
+        "variants": [
+            { "id": 84, "mode": "DM", "players": 12 },
+            { "id": 85, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "Luna-2",
+        "gid": 51,
+        "variants": [
+            { "id": 86, "mode": "DM", "players": 12 },
+            { "id": 87, "mode": "Captain", "players": 16 }
+        ]
+    },{
+        "name": "Treasure",
+        "gid": 52,
+        "variants": [
+            { "id": 88, "mode": "DM", "players": 12 }
+        ]
+    },{
+        "name": "Galleon",
+        "gid": 53,
+        "variants": [
+            { "id": 89, "mode": "DM", "players": 16 },
+            { "id": 90, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "BlockBuster",
+        "gid": 54,
+        "variants": [
+            { "id": 91, "mode": "DM", "players": 12 },
+            { "id": 92, "mode": "Chaser", "players": 12 }
+        ]
+    },{
+        "name": "Circle-1",
+        "gid": 55,
+        "variants": [
+            { "id": 93, "mode": "DM", "players": 12 }
+        ]
+    },{
+        "name": "Alice House",
+        "gid": 56,
+        "variants": [
+            { "id": 94, "mode": "Chaser", "players": 12 }
+        ]
+    },{
+        "name": "Grave",
+        "gid": 57,
+        "variants": [
+            { "id": 95, "mode": "Chaser", "players": 12 }
+        ]
+    },{
+        "name": "Nightmare",
+        "gid": 58,
+        "variants": [
+            { "id": 96, "mode": "Chaser", "players": 12 },
+            { "id": 97, "mode": "Captain", "players": 16 }
+        ]
+    },{
+        "name": "Temple-O",
+        "gid": 59,
+        "variants": [
+            { "id": 98, "mode": "Chaser", "players": 12 }
+        ]
+    },{
+        "name": "Connest-2",
+        "gid": 60,
+        "variants": [
+            { "id": 99, "mode": "Chaser", "players": 12 }
+        ]
+    },{
+        "name": "Circle-2",
+        "gid": 61,
+        "variants": [
+            { "id": 100, "mode": "Chaser", "players": 12 }
+        ]
+    },{
+        "name": "Office",
+        "gid": 62,
+        "variants": [
+            { "id": 101, "mode": "Chaser", "players": 12 }
+        ]
+    },{
+        "name": "Lost Salvage",
+        "gid": 63,
+        "variants": [
+            { "id": 102, "mode": "BR", "players": 16 },
+            { "id": 103, "mode": "Siege", "players": 16 }
+        ]
+    },{
+        "name": "Skyline",
+        "gid": 64,
+        "variants": [
+            { "id": 104, "mode": "Siege", "players": 16 }
+        ]
+    }
+]

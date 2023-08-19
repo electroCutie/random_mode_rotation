@@ -1,0 +1,17 @@
+[package]
+name = "mode_rotation"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.75"
+chrono = "0.4.26"
+json = "0.12.4"
+pancurses = "0.17.0"
+rand = "0.8.5"
+read_line = "0.0.1"
+regex = "1.9.3"
+croot = "0.3.3"
+thiserror = "1.0.47"
