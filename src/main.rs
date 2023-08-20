@@ -1,7 +1,6 @@
 use std::{error::Error, io::Write, rc::Rc};
 
 mod map_data;
-use croot::roots::principal_root;
 use map_data::*;
 
 mod play_log;
@@ -10,27 +9,50 @@ use rand::random;
 
 struct MapScoring {
     map: Rc<Map>,
+    age: u16,
+    cross_type_sibling_penalty: f64,
     penalty: f64,
 }
 
+static MAX_AGE: u16 = 200;
 static ROUND_PENALTY: f64 = 1000.0;
 static ROUND_DISCOUNT: f64 = 1.0 / 1.010_889_286_051_700_5; // ~ 64th root of 2, so the penalty halves every 64 rounds
+static CROSS_TYPE_ROUND_DISCOUNT: f64 = 1.0 / 1.059_463_094_359_295_3; // ~ 12th root of 2, so the penalty halves every 12 rounds
+
+static PENALTY_NONLINEARITY: f64 = 1.4; // penalty raised to this power before inverting
+static AGE_POW: f64 = 0.6; // age raised to this power before being multiplied by the inverted penalty
 
 impl MapScoring {
     fn map_played(&mut self, other_map: &Map) {
         self.penalty *= ROUND_DISCOUNT;
+        self.cross_type_sibling_penalty *= CROSS_TYPE_ROUND_DISCOUNT;
+        self.age = MAX_AGE.min(self.age + 1);
 
-        let my_gid = self.map.group().gid;
-        let other_gid = other_map.group().gid;
+        if *other_map == *self.map {
+            self.age = 1;
+        }
 
-        if my_gid == other_gid {
-            // we are in a group with the other map, apply a recent-ness penalty, discounted by type
-            self.penalty += self.map.mode.mode_discount(other_map.mode) * ROUND_PENALTY;
+        let my_g = self.map.group();
+        let other_g = other_map.group();
+
+        if my_g == other_g {
+            if self.map.mode == other_map.mode {
+                self.penalty += ROUND_PENALTY;
+            } else {
+                // we are in a group with the other map, apply a recent-ness penalty, discounted by type
+                self.penalty += self.map.mode.mode_discount(other_map.mode) * ROUND_PENALTY;
+            }
         }
     }
 
     fn final_score(self) -> (f64, Rc<Map>) {
-        let s = 1000. / self.penalty.powf(1.4);
+        // penalty is the sum of both types
+        let s = self.penalty + self.cross_type_sibling_penalty;
+        // make the penalty non-linear to further penalize recent plays & invert
+        let s = 1000. / s.powf(PENALTY_NONLINEARITY);
+        // raise the chance of maps that haven't been played in a while
+        let s = s * (self.age as f64).powf(AGE_POW);
+        // don't let the values go TOO sideways
         let s = s.clamp(0.001, 100000.);
         (s, self.map)
     }
@@ -52,6 +74,8 @@ fn build_scores(
         .filter(|m| m.mode == mode && m.players >= players)
         .map(|map| MapScoring {
             map: map.clone(),
+            age: MAX_AGE,
+            cross_type_sibling_penalty: 1.0,
             penalty: 1.0,
         })
         .collect();
@@ -70,10 +94,10 @@ fn build_scores(
     let mut scores = normalize_scores(scores.as_slice());
     scores.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap().reverse());
 
-    // println!();
-    // for (s, m) in &scores {
-    //     println!("{} {}", s, m.map_info());
-    // }
+    println!();
+    for (s, m) in &scores {
+        println!("{} {}", s, m.map_info());
+    }
 
     scores
 }
@@ -96,23 +120,27 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     loop {
         print!("Selecting Options");
-        let scores = build_scores(&log, mode, players, map_list.as_slice());
+        std::io::stdout().flush()?;
+
+        let mut scores = build_scores(&log, mode, players, map_list.as_slice());
         assert!(!scores.is_empty());
+
         print!(".");
         std::io::stdout().flush()?;
 
         let mut random_maps: Vec<(f64, Rc<Map>)> = Vec::new();
 
         loop {
-            let mut random: f64 = random();
-            for (s, m) in &scores {
+            let sum: f64 = scores.iter().map(|s| s.0).sum();
+            let mut random: f64 = random::<f64>() * sum;
+            for ((s, m), idx) in scores.iter().zip(0..) {
                 random -= *s;
                 if random <= 0. {
-                    if !random_maps.iter().any(|(_, e)| m.id == e.id) {
-                        random_maps.push((*s, m.clone()));
-                        print!(".");
-                        std::io::stdout().flush()?;
-                    }
+                    assert!(!random_maps.iter().any(|(_, e)| m.id == e.id));
+                    random_maps.push((*s, m.clone()));
+                    scores.remove(idx);
+                    print!(".");
+                    std::io::stdout().flush()?;
                     break;
                 }
             }

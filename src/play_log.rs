@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    fs::{self, File, OpenOptions},
+    fs::OpenOptions,
     io::{BufRead, BufReader, Read, Seek, SeekFrom, Write},
     rc::Rc,
 };
