@@ -18,7 +18,6 @@ static ROUND_DISCOUNT: f64 = 1.0 / 1.010_889_286_051_700_5; // ~ 64th root of 2,
 
 impl MapScoring {
     fn map_played(&mut self, other_map: &Map) {
-        // TODO: maybe someday this can be a Lazy Cell
         self.penalty *= ROUND_DISCOUNT;
 
         let my_gid = self.map.group().gid;
@@ -71,8 +70,7 @@ fn build_scores(
     let mut scores = normalize_scores(scores.as_slice());
     scores.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap().reverse());
 
-    println!();
-
+    // println!();
     // for (s, m) in &scores {
     //     println!("{} {}", s, m.map_info());
     // }
@@ -84,7 +82,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let (_, maps) = load_map_data()?;
     println!("Loaded {} maps", maps.len());
 
-    // append_log(maps.get(&2).unwrap())?;
     let mut log = load_log(&maps)?;
     println!("Loaded Log with {} entries", log.len());
 
@@ -102,6 +99,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let scores = build_scores(&log, mode, players, map_list.as_slice());
         assert!(!scores.is_empty());
         print!(".");
+        std::io::stdout().flush()?;
 
         let mut random_maps: Vec<(f64, Rc<Map>)> = Vec::new();
 
@@ -110,27 +108,44 @@ fn main() -> Result<(), Box<dyn Error>> {
             for (s, m) in &scores {
                 random -= *s;
                 if random <= 0. {
-                    //TODO: reject maps we already have selected
                     if !random_maps.iter().any(|(_, e)| m.id == e.id) {
                         random_maps.push((*s, m.clone()));
-                        break;
+                        print!(".");
+                        std::io::stdout().flush()?;
                     }
+                    break;
                 }
             }
-            print!(".");
 
             if random_maps.len() >= 3 {
                 break;
             }
         }
+
+        random_maps.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap().reverse());
+
         println!();
 
-        print!("Mode {} ({})\n Maps:\n (1) {} ({:.2}%)\n (2) {} ({:.2}%)\n (3) {} ({:.2}%)\n (m) Change Mode\n (p) Set Players\n (s) Shuffle\n > ",
-            mode, players,
-            random_maps[0].1.map_info(), random_maps[0].0 * 100.,
-            random_maps[1].1.map_info(), random_maps[1].0 * 100.,
-            random_maps[2].1.map_info(), random_maps[2].0 * 100.,
+        println!("Mode {} ({})", mode, players);
+        println!(
+            " (1) {} ({:.2}%)",
+            random_maps[0].1.map_info(),
+            random_maps[0].0 * 100.
         );
+        println!(
+            " (2) {} ({:.2}%)",
+            random_maps[1].1.map_info(),
+            random_maps[1].0 * 100.
+        );
+        println!(
+            " (3) {} ({:.2}%)",
+            random_maps[2].1.map_info(),
+            random_maps[2].0 * 100.
+        );
+        println!(" (m) Change Mode");
+        println!(" (p) Set Players");
+        println!(" (s) Shuffle");
+        print!("> ");
         std::io::stdout().flush()?;
 
         let selection = loop {
@@ -144,7 +159,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 Some('p') => break 5,
                 Some('s') => break 6,
                 _ => {
-                    print!("bad response\n > ");
+                    print!("bad response\n> ");
                     std::io::stdout().flush()?;
                 }
             }
@@ -159,7 +174,15 @@ fn main() -> Result<(), Box<dyn Error>> {
                 println!("{} Selected. Have Fun!\n", map.map_info());
             }
             4 => {
-                print!( "Select Mode:\n (1) TD\n (2) DM\n (3) Chaser\n (4) BR\n (5) Captain (6) Siege\n > ");
+                println!("Select Mode:");
+                println!(" (1) TD");
+                println!(" (2) DM");
+                println!(" (3) Chaser");
+                println!(" (4) BR");
+                println!(" (5) Captain");
+                println!(" (6) Siege");
+                println!(" (c) Cancel");
+                print!("> ");
                 std::io::stdout().flush()?;
                 loop {
                     let response = read_line::read_line();
@@ -171,6 +194,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         Some('4') => mode = Mode::BR,
                         Some('5') => mode = Mode::Captain,
                         Some('6') => mode = Mode::Siege,
+                        Some('c') => {}
                         _ => {
                             print!("bad response\n > ");
                             std::io::stdout().flush()?;
@@ -181,7 +205,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
             5 => {
-                print!("How many players?\n > ");
+                print!("How many players?\n> ");
                 std::io::stdout().flush()?;
                 loop {
                     let response = read_line::read_line();
@@ -190,7 +214,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     match p {
                         Ok(n @ 8..=16) => players = n,
                         _ => {
-                            println!("invalid number, expecting 8-16\n > ");
+                            println!("invalid number, expecting 8-16\n> ");
                             continue;
                         }
                     }
@@ -203,7 +227,4 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
     }
-
-    // let round_discount:f64 = principal_root(2., 64.).re;
-    // println!("{} {}", ROUND_DISCOUNT, ROUND_DISCOUNT.powi(64));
 }
