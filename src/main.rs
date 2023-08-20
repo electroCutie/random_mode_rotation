@@ -2,7 +2,7 @@ use std::{
     error::Error,
     fmt::{Debug, Display},
     io::Write,
-    rc::Rc,
+    rc::Rc, collections::HashMap,
 };
 
 mod map_data;
@@ -134,13 +134,18 @@ fn pick_random_maps(
     mode: Mode,
     players: u16,
     all_maps: &[RcMap],
+    quiet: bool
 ) -> Result<Vec<(f64, RcMap)>, Box<dyn Error>> {
-    print_flush!("Selecting Options");
+    if !quiet {
+        print_flush!("Selecting Options");
+    }
 
     let mut scores = build_scores(log, mode, players, all_maps);
     assert!(!scores.is_empty());
 
-    print_flush!(".");
+    if !quiet{
+        print_flush!(".");
+    }
 
     let mut random_maps: Vec<(f64, RcMap)> = Vec::new();
 
@@ -153,7 +158,9 @@ fn pick_random_maps(
                 assert!(!random_maps.iter().any(|(_, e)| m.id == e.id));
                 random_maps.push((*s, m.clone()));
                 scores.remove(idx);
-                print_flush!(".");
+                if !quiet{
+                    print_flush!(".");
+                }
                 break;
             }
         }
@@ -169,7 +176,17 @@ fn pick_random_maps(
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let (_, maps) = load_map_data()?;
+    let (groups, maps) = load_map_data()?;
+    
+    let all_maps: Vec<RcMap> = maps.values().map(Rc::clone).collect();
+
+    let args: Vec<String> = std::env::args().collect();
+    if args.get(1).filter(|a| *a == "--simulate").is_some() {
+        let groups: Vec<RcGroup> = groups.values().map(Rc::clone).collect();
+        simulate(&groups,&all_maps)?;
+        return Ok(());
+    }
+
     println!("Loaded {} maps", maps.len());
 
     let mut log = load_log(&maps)?;
@@ -182,12 +199,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
     let mut players = 16u16;
 
-    let all_maps: Vec<RcMap> = maps.values().map(Rc::clone).collect();
-    let all_maps = all_maps.as_slice();
-
     // main loop
     loop {
-        let random_maps = pick_random_maps(&log, mode, players, all_maps)?;
+        let random_maps = pick_random_maps(&log, mode, players, &all_maps, false)?;
         print_map_choices(mode, players, &random_maps)?;
 
         match get_mode_action()? {
@@ -207,4 +221,52 @@ fn main() -> Result<(), Box<dyn Error>> {
             ModeAction::Shuffle => {} // No action required, just loop
         }
     }
+}
+
+
+fn simulate(all_groups: &[RcGroup], all_maps: &[RcMap]) -> Result<(), Box<dyn Error>>{
+    use std::borrow::BorrowMut;
+
+    let mut log = Vec::new();
+    let mut mode = Mode::TD;
+    
+    for _ in 0..10_000 {
+        let random_maps = pick_random_maps(&log, mode, 16, all_maps, true)?;
+        let map = &random_maps.get(0).unwrap().1;
+
+        log.push(map.clone());
+        mode = mode.next();
+    }
+
+    let mut counts: HashMap<u16, u32> = HashMap::new();
+
+    for m in log {
+        let e = counts.entry(m.id);
+        match e {
+            std::collections::hash_map::Entry::Occupied(mut e) => {
+                let v = e.get_mut();
+                *v += 1;
+            },
+            std::collections::hash_map::Entry::Vacant(e) => {
+                e.insert(1);
+            },
+        }
+    }
+
+    for mode in Mode::ordered() {
+        for group in all_groups{
+            for map in &group.variants {
+                if map.mode != mode {
+                    continue;
+                }
+
+                let ct = counts.get(&map.id);
+                if let Some(ct) = ct {
+                    println!("\"{}\",\"{}\",{}", mode, map.nickname, ct);
+                }
+            }
+        }
+    }
+
+    Ok(())
 }

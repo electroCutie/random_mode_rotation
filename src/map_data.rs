@@ -173,7 +173,8 @@ impl MapError {
     }
 }
 
-pub type Groups = HashMap<u16, Rc<MapGroup>>;
+pub type RcGroup = Rc<MapGroup>;
+pub type Groups = HashMap<u16, RcGroup>;
 pub type RcMap = Rc<Map>;
 pub type Maps = HashMap<u16, RcMap>;
 

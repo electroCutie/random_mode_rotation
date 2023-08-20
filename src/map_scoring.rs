@@ -8,7 +8,7 @@ static ROUND_DISCOUNT: f64 = 1.0 / 1.010_889_286_051_700_5; // ~ 64th root of 2,
 static CROSS_TYPE_ROUND_DISCOUNT: f64 = 1.0 / 1.059_463_094_359_295_3; // ~ 12th root of 2, so the penalty halves every 12 rounds
 
 static PENALTY_NONLINEARITY: f64 = 1.4; // penalty raised to this power before inverting
-static AGE_POW: f64 = 0.6; // age raised to this power before being multiplied by the inverted penalty
+static AGE_POW: f64 = 0.4; // age raised to this power before being multiplied by the inverted penalty
 
 pub struct MapScoring {
     pub map: Rc<Map>,

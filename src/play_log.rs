@@ -95,7 +95,7 @@ pub fn load_log(maps: &Maps) -> Result<Vec<Rc<Map>>, Box<dyn Error>> {
             return Err(Box::new(LogError::new(
                 line_num,
                 "Could not find map with id",
-                id.to_string(),
+                id,
             )));
         }
 
