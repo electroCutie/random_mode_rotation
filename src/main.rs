@@ -1,4 +1,9 @@
-use std::{error::Error, io::Write, rc::Rc};
+use std::{
+    error::Error,
+    fmt::{Debug, Display},
+    io::Write,
+    rc::Rc,
+};
 
 mod map_data;
 use map_data::*;
@@ -7,99 +12,160 @@ mod play_log;
 use play_log::*;
 use rand::random;
 
-struct MapScoring {
-    map: Rc<Map>,
-    age: u16,
-    cross_type_sibling_penalty: f64,
-    penalty: f64,
+mod map_scoring;
+use map_scoring::*;
+
+enum ModeAction {
+    SelectMap(usize),
+    ChangeMode,
+    SetPlayerCt,
+    Shuffle,
 }
 
-static MAX_AGE: u16 = 200;
-static ROUND_PENALTY: f64 = 1000.0;
-static ROUND_DISCOUNT: f64 = 1.0 / 1.010_889_286_051_700_5; // ~ 64th root of 2, so the penalty halves every 64 rounds
-static CROSS_TYPE_ROUND_DISCOUNT: f64 = 1.0 / 1.059_463_094_359_295_3; // ~ 12th root of 2, so the penalty halves every 12 rounds
-
-static PENALTY_NONLINEARITY: f64 = 1.4; // penalty raised to this power before inverting
-static AGE_POW: f64 = 0.6; // age raised to this power before being multiplied by the inverted penalty
-
-impl MapScoring {
-    fn map_played(&mut self, other_map: &Map) {
-        self.penalty *= ROUND_DISCOUNT;
-        self.cross_type_sibling_penalty *= CROSS_TYPE_ROUND_DISCOUNT;
-        self.age = MAX_AGE.min(self.age + 1);
-
-        if *other_map == *self.map {
-            self.age = 1;
+macro_rules! print_flush {
+    ($($pargs:expr),+) => {
+        {
+            use std::io::stdout;
+            print!($($pargs),+);
+            stdout().flush()?;
         }
-
-        let my_g = self.map.group();
-        let other_g = other_map.group();
-
-        if my_g == other_g {
-            if self.map.mode == other_map.mode {
-                self.penalty += ROUND_PENALTY;
-            } else {
-                // we are in a group with the other map, apply a recent-ness penalty, discounted by type
-                self.penalty += self.map.mode.mode_discount(other_map.mode) * ROUND_PENALTY;
-            }
-        }
-    }
-
-    fn final_score(self) -> (f64, Rc<Map>) {
-        // penalty is the sum of both types
-        let s = self.penalty + self.cross_type_sibling_penalty;
-        // make the penalty non-linear to further penalize recent plays & invert
-        let s = 1000. / s.powf(PENALTY_NONLINEARITY);
-        // raise the chance of maps that haven't been played in a while
-        let s = s * (self.age as f64).powf(AGE_POW);
-        // don't let the values go TOO sideways
-        let s = s.clamp(0.001, 100000.);
-        (s, self.map)
-    }
+    };
 }
 
-fn normalize_scores(scores: &[(f64, Rc<Map>)]) -> Vec<(f64, Rc<Map>)> {
-    let sum: f64 = scores.iter().map(|s| s.0).sum();
-    scores.iter().map(|(s, m)| (s / sum, m.clone())).collect()
+fn read_line() -> String {
+    let mut input = String::new();
+    std::io::stdin()
+        .read_line(&mut input)
+        .expect("Error: unable to read user input");
+
+    input
 }
 
-fn build_scores(
-    log: &[Rc<Map>],
+fn print_map_choices(
     mode: Mode,
     players: u16,
-    all_maps: &[Rc<Map>],
-) -> Vec<(f64, Rc<Map>)> {
-    let mut scores: Vec<MapScoring> = all_maps
-        .iter()
-        .filter(|m| m.mode == mode && m.players >= players)
-        .map(|map| MapScoring {
-            map: map.clone(),
-            age: MAX_AGE,
-            cross_type_sibling_penalty: 1.0,
-            penalty: 1.0,
-        })
-        .collect();
+    random_maps: &[(f64, RcMap)],
+) -> Result<(), Box<dyn Error>> {
+    fn print_map_choice(idx: usize, random_maps: &[(f64, RcMap)]) {
+        let (percent, map) = &random_maps[idx];
+        println!(" ({}) {} ({:.2}%)", idx + 1, map.map_info(), percent * 100.);
+    }
 
-    for s in &mut scores {
-        for l in log {
-            s.map_played(l);
+    println!();
+    println!("Mode {} ({})", mode, players);
+    print_map_choice(0, random_maps);
+    print_map_choice(1, random_maps);
+    print_map_choice(2, random_maps);
+    println!(" (m) Change Mode");
+    println!(" (p) Set Players");
+    println!(" (s) Shuffle");
+    print_flush!("> ");
+
+    Ok(())
+}
+
+fn read_until_valid<F, T, E>(f: F) -> Result<T, Box<dyn Error>>
+where
+    F: Fn(String) -> Result<T, E>,
+    E: Display + Debug,
+{
+    loop {
+        let response = read_line().trim().to_string();
+        let response = f(response);
+        match response {
+            Ok(v) => break Ok(v),
+            Err(err) => print_flush!("{}\n> ", err),
+        }
+    }
+}
+
+fn read_until_valid_char<F, T, E>(f: F) -> Result<T, Box<dyn Error>>
+where
+    F: Fn(Option<char>) -> Result<T, E>,
+    E: Display + Debug,
+{
+    read_until_valid(|response| f(response.chars().next()))
+}
+
+fn get_mode_action() -> Result<ModeAction, Box<dyn Error>> {
+    read_until_valid_char(|response| match response {
+        Some('1') => Ok(ModeAction::SelectMap(0)),
+        Some('2') => Ok(ModeAction::SelectMap(1)),
+        Some('3') => Ok(ModeAction::SelectMap(2)),
+        Some('m') => Ok(ModeAction::ChangeMode),
+        Some('p') => Ok(ModeAction::SetPlayerCt),
+        Some('s') => Ok(ModeAction::Shuffle),
+        _ => Err("bad response"),
+    })
+}
+
+fn prompt_for_player_ct() -> Result<u16, Box<dyn Error>> {
+    print_flush!("How many players?\n> ");
+    read_until_valid(|response| {
+        let p = response.parse::<u16>();
+        match p {
+            Ok(n @ 8..=16) => Ok(n),
+            _ => Err("players must be between 8 and 16"),
+        }
+    })
+}
+
+fn prompt_for_mode() -> Result<Option<Mode>, Box<dyn Error>> {
+    println!("Select Mode:");
+    for (mode, idx) in Mode::ordered().iter().zip(1..) {
+        println!(" ({}) {}", idx, mode);
+    }
+    println!(" (c) Cancel");
+    print_flush!("> ");
+    read_until_valid_char(|response| match response {
+        Some('1') => Ok(Some(Mode::TD)),
+        Some('2') => Ok(Some(Mode::DM)),
+        Some('3') => Ok(Some(Mode::Chaser)),
+        Some('4') => Ok(Some(Mode::BR)),
+        Some('5') => Ok(Some(Mode::Captain)),
+        Some('6') => Ok(Some(Mode::Siege)),
+        Some('c') => Ok(None),
+        _ => Err("bad response"),
+    })
+}
+
+fn pick_random_maps(
+    log: &[RcMap],
+    mode: Mode,
+    players: u16,
+    all_maps: &[RcMap],
+) -> Result<Vec<(f64, RcMap)>, Box<dyn Error>> {
+    print_flush!("Selecting Options");
+
+    let mut scores = build_scores(log, mode, players, all_maps);
+    assert!(!scores.is_empty());
+
+    print_flush!(".");
+
+    let mut random_maps: Vec<(f64, RcMap)> = Vec::new();
+
+    loop {
+        let sum: f64 = scores.iter().map(|s| s.0).sum();
+        let mut random: f64 = random::<f64>() * sum;
+        for ((s, m), idx) in scores.iter().zip(0..) {
+            random -= *s;
+            if random <= 0. {
+                assert!(!random_maps.iter().any(|(_, e)| m.id == e.id));
+                random_maps.push((*s, m.clone()));
+                scores.remove(idx);
+                print_flush!(".");
+                break;
+            }
+        }
+
+        if random_maps.len() >= 3 {
+            break;
         }
     }
 
-    // for s in &scores {
-    //     println!("{} {}", s.penalty, s.map.map_info());
-    // }
+    random_maps.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap().reverse());
 
-    let scores: Vec<(f64, Rc<Map>)> = scores.into_iter().map(MapScoring::final_score).collect();
-    let mut scores = normalize_scores(scores.as_slice());
-    scores.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap().reverse());
-
-    println!();
-    for (s, m) in &scores {
-        println!("{} {}", s, m.map_info());
-    }
-
-    scores
+    Ok(random_maps)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -109,150 +175,36 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut log = load_log(&maps)?;
     println!("Loaded Log with {} entries", log.len());
 
+    // Initial state
     let mut mode = match log.last() {
         None => Mode::TD,
         Some(m) => m.mode.next(),
     };
-
     let mut players = 16u16;
 
-    let map_list: Vec<Rc<Map>> = maps.values().map(Rc::clone).collect();
+    let all_maps: Vec<RcMap> = maps.values().map(Rc::clone).collect();
+    let all_maps = all_maps.as_slice();
 
+    // main loop
     loop {
-        print!("Selecting Options");
-        std::io::stdout().flush()?;
+        let random_maps = pick_random_maps(&log, mode, players, all_maps)?;
+        print_map_choices(mode, players, &random_maps)?;
 
-        let mut scores = build_scores(&log, mode, players, map_list.as_slice());
-        assert!(!scores.is_empty());
-
-        print!(".");
-        std::io::stdout().flush()?;
-
-        let mut random_maps: Vec<(f64, Rc<Map>)> = Vec::new();
-
-        loop {
-            let sum: f64 = scores.iter().map(|s| s.0).sum();
-            let mut random: f64 = random::<f64>() * sum;
-            for ((s, m), idx) in scores.iter().zip(0..) {
-                random -= *s;
-                if random <= 0. {
-                    assert!(!random_maps.iter().any(|(_, e)| m.id == e.id));
-                    random_maps.push((*s, m.clone()));
-                    scores.remove(idx);
-                    print!(".");
-                    std::io::stdout().flush()?;
-                    break;
-                }
-            }
-
-            if random_maps.len() >= 3 {
-                break;
-            }
-        }
-
-        random_maps.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap().reverse());
-
-        println!();
-
-        println!("Mode {} ({})", mode, players);
-        println!(
-            " (1) {} ({:.2}%)",
-            random_maps[0].1.map_info(),
-            random_maps[0].0 * 100.
-        );
-        println!(
-            " (2) {} ({:.2}%)",
-            random_maps[1].1.map_info(),
-            random_maps[1].0 * 100.
-        );
-        println!(
-            " (3) {} ({:.2}%)",
-            random_maps[2].1.map_info(),
-            random_maps[2].0 * 100.
-        );
-        println!(" (m) Change Mode");
-        println!(" (p) Set Players");
-        println!(" (s) Shuffle");
-        print!("> ");
-        std::io::stdout().flush()?;
-
-        let selection = loop {
-            let response = read_line::read_line();
-            let response = response.chars().next();
-            match response {
-                Some('1') => break 1,
-                Some('2') => break 2,
-                Some('3') => break 3,
-                Some('m') => break 4,
-                Some('p') => break 5,
-                Some('s') => break 6,
-                _ => {
-                    print!("bad response\n> ");
-                    std::io::stdout().flush()?;
-                }
-            }
-        };
-
-        match selection {
-            s @ 1..=3 => {
-                let map = random_maps.get(s - 1).unwrap().1.clone();
+        match get_mode_action()? {
+            ModeAction::SelectMap(n) => {
+                let map = random_maps.get(n).unwrap().1.clone();
                 append_log(map.as_ref())?;
                 log.push(map.clone());
                 mode = mode.next();
                 println!("{} Selected. Have Fun!\n", map.map_info());
             }
-            4 => {
-                println!("Select Mode:");
-                println!(" (1) TD");
-                println!(" (2) DM");
-                println!(" (3) Chaser");
-                println!(" (4) BR");
-                println!(" (5) Captain");
-                println!(" (6) Siege");
-                println!(" (c) Cancel");
-                print!("> ");
-                std::io::stdout().flush()?;
-                loop {
-                    let response = read_line::read_line();
-                    let response = response.chars().next();
-                    match response {
-                        Some('1') => mode = Mode::TD,
-                        Some('2') => mode = Mode::DM,
-                        Some('3') => mode = Mode::Chaser,
-                        Some('4') => mode = Mode::BR,
-                        Some('5') => mode = Mode::Captain,
-                        Some('6') => mode = Mode::Siege,
-                        Some('c') => {}
-                        _ => {
-                            print!("bad response\n > ");
-                            std::io::stdout().flush()?;
-                            continue;
-                        }
-                    }
-                    break;
+            ModeAction::ChangeMode => {
+                if let Some(m) = prompt_for_mode()? {
+                    mode = m;
                 }
             }
-            5 => {
-                print!("How many players?\n> ");
-                std::io::stdout().flush()?;
-                loop {
-                    let response = read_line::read_line();
-                    let response = response.trim();
-                    let p = response.parse::<u16>();
-                    match p {
-                        Ok(n @ 8..=16) => players = n,
-                        _ => {
-                            println!("invalid number, expecting 8-16\n> ");
-                            continue;
-                        }
-                    }
-                    break;
-                }
-            }
-            6 => println!("Shuffling"),
-            _ => {
-                println!("This should be impossible. Shuffling")
-            }
+            ModeAction::SetPlayerCt => players = prompt_for_player_ct()?,
+            ModeAction::Shuffle => {} // No action required, just loop
         }
     }
 }

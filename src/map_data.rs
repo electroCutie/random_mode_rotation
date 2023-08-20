@@ -174,7 +174,8 @@ impl MapError {
 }
 
 pub type Groups = HashMap<u16, Rc<MapGroup>>;
-pub type Maps = HashMap<u16, Rc<Map>>;
+pub type RcMap = Rc<Map>;
+pub type Maps = HashMap<u16, RcMap>;
 
 pub fn load_map_data() -> Result<(Groups, Maps), Box<dyn Error>> {
     let raw_json = fs::read_to_string("all_maps.json")?;
