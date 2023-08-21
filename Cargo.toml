@@ -11,7 +11,6 @@ json = "0.12.4"
 # pancurses = "0.17.0"
 rand = "0.8.5"
 regex = "1.9.3"
-croot = "0.3.3"
 thiserror = "1.0.47"
 
 [features]

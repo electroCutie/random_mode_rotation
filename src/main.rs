@@ -225,8 +225,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 
 fn simulate(all_groups: &[RcGroup], all_maps: &[RcMap]) -> Result<(), Box<dyn Error>>{
-    use std::borrow::BorrowMut;
-
     let mut log = Vec::new();
     let mut mode = Mode::TD;
     
