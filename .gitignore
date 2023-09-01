@@ -1,0 +1,5 @@
+*
+!all_maps.json
+!./src/*
+!Cargo.*
+/target

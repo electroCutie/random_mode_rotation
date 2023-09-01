@@ -1,11 +1,16 @@
 use std::{
+    collections::HashMap,
     error::Error,
     fmt::{Debug, Display},
     io::Write,
-    rc::Rc, collections::HashMap,
+    rc::Rc,
 };
 
+mod coloring;
+
 mod map_data;
+use ansi_term::{ANSIString, Color, Style};
+use coloring::MaybeColor;
 use map_data::*;
 
 mod play_log;
@@ -41,6 +46,17 @@ fn read_line() -> String {
     input
 }
 
+fn choice<'a, S>(choice: S) -> ANSIString<'a>
+where
+    S: ToString,
+{
+    Style::new()
+        .fg(Color::White)
+        .bold()
+        .maybe_color()
+        .paint(choice.to_string())
+}
+
 fn print_map_choices(
     mode: Mode,
     players: u16,
@@ -48,17 +64,26 @@ fn print_map_choices(
 ) -> Result<(), Box<dyn Error>> {
     fn print_map_choice(idx: usize, random_maps: &[(f64, RcMap)]) {
         let (percent, map) = &random_maps[idx];
-        println!(" ({}) {} ({:.2}%)", idx + 1, map.map_info(), percent * 100.);
+        println!(
+            " ({}) {} ({}) {}",
+            choice(idx + 1),
+            map.nickname,
+            map.players,
+            Style::new()
+                .italic()
+                .maybe_color()
+                .paint(format!("{:.2}%", percent * 100.))
+        );
     }
 
     println!();
-    println!("Mode {} ({})", mode, players);
+    println!("Mode {} for {} players", mode, players);
     print_map_choice(0, random_maps);
     print_map_choice(1, random_maps);
     print_map_choice(2, random_maps);
-    println!(" (m) Change Mode");
-    println!(" (p) Set Players");
-    println!(" (s) Shuffle");
+    println!(" ({}) Change Mode", choice('m'));
+    println!(" ({}) Set Players", choice('p'));
+    println!(" ({}) Shuffle", choice('s'));
     print_flush!("> ");
 
     Ok(())
@@ -113,9 +138,9 @@ fn prompt_for_player_ct() -> Result<u16, Box<dyn Error>> {
 fn prompt_for_mode() -> Result<Option<Mode>, Box<dyn Error>> {
     println!("Select Mode:");
     for (mode, idx) in Mode::ordered().iter().zip(1..) {
-        println!(" ({}) {}", idx, mode);
+        println!(" ({}) {}", choice(idx), mode);
     }
-    println!(" (c) Cancel");
+    println!(" ({}) Cancel", choice('c'));
     print_flush!("> ");
     read_until_valid_char(|response| match response {
         Some('1') => Ok(Some(Mode::TD)),
@@ -134,7 +159,7 @@ fn pick_random_maps(
     mode: Mode,
     players: u16,
     all_maps: &[RcMap],
-    quiet: bool
+    quiet: bool,
 ) -> Result<Vec<(f64, RcMap)>, Box<dyn Error>> {
     if !quiet {
         print_flush!("Selecting Options");
@@ -143,7 +168,7 @@ fn pick_random_maps(
     let mut scores = build_scores(log, mode, players, all_maps);
     assert!(!scores.is_empty());
 
-    if !quiet{
+    if !quiet {
         print_flush!(".");
     }
 
@@ -158,7 +183,7 @@ fn pick_random_maps(
                 assert!(!random_maps.iter().any(|(_, e)| m.id == e.id));
                 random_maps.push((*s, m.clone()));
                 scores.remove(idx);
-                if !quiet{
+                if !quiet {
                     print_flush!(".");
                 }
                 break;
@@ -177,13 +202,13 @@ fn pick_random_maps(
 
 fn main() -> Result<(), Box<dyn Error>> {
     let (groups, maps) = load_map_data()?;
-    
+
     let all_maps: Vec<RcMap> = maps.values().map(Rc::clone).collect();
 
     let args: Vec<String> = std::env::args().collect();
     if args.get(1).filter(|a| *a == "--simulate").is_some() {
         let groups: Vec<RcGroup> = groups.values().map(Rc::clone).collect();
-        simulate(&groups,&all_maps)?;
+        simulate(&groups, &all_maps)?;
         return Ok(());
     }
 
@@ -223,11 +248,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 }
 
-
-fn simulate(all_groups: &[RcGroup], all_maps: &[RcMap]) -> Result<(), Box<dyn Error>>{
+fn simulate(all_groups: &[RcGroup], all_maps: &[RcMap]) -> Result<(), Box<dyn Error>> {
     let mut log = Vec::new();
     let mut mode = Mode::TD;
-    
+
     for _ in 0..10_000 {
         let random_maps = pick_random_maps(&log, mode, 16, all_maps, true)?;
         let map = &random_maps.get(0).unwrap().1;
@@ -244,15 +268,15 @@ fn simulate(all_groups: &[RcGroup], all_maps: &[RcMap]) -> Result<(), Box<dyn Er
             std::collections::hash_map::Entry::Occupied(mut e) => {
                 let v = e.get_mut();
                 *v += 1;
-            },
+            }
             std::collections::hash_map::Entry::Vacant(e) => {
                 e.insert(1);
-            },
+            }
         }
     }
 
     for mode in Mode::ordered() {
-        for group in all_groups{
+        for group in all_groups {
             for map in &group.variants {
                 if map.mode != mode {
                     continue;

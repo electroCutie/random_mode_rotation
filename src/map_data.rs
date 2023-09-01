@@ -1,15 +1,18 @@
 use std::{cell::RefCell, collections::HashMap, error::Error, fmt::Display, fs, rc::Rc};
 
+use ansi_term::{Color, Style};
 use json::JsonValue;
+
+use crate::coloring::MaybeColor;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum Mode {
-    TD,
-    DM,
-    Chaser,
-    BR,
-    Captain,
-    Siege,
+    TD,      // lightish blue
+    DM,      // red
+    Chaser,  // green
+    BR,      // purple
+    Captain, // pink
+    Siege,   // yellow
 }
 
 impl Mode {
@@ -24,6 +27,18 @@ impl Mode {
         ];
         modes.sort_unstable();
         modes
+    }
+
+    pub fn console_color(&self) -> Style {
+        match self {
+            Mode::TD => Style::new().fg(Color::Cyan),
+            Mode::DM => Style::new().fg(Color::Red),
+            Mode::Chaser => Style::new().fg(Color::Green),
+            Mode::BR => Style::new().fg(Color::Purple).dimmed(),
+            Mode::Captain => Style::new().fg(Color::Purple),
+            Mode::Siege => Style::new().fg(Color::Yellow),
+        }
+        .bold()
     }
 
     pub fn next(&self) -> Self {
@@ -89,14 +104,16 @@ impl TryInto<Mode> for &str {
 
 impl Display for Mode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Mode::TD => f.write_str("TD"),
-            Mode::DM => f.write_str("DM"),
-            Mode::Chaser => f.write_str("Chaser"),
-            Mode::BR => f.write_str("BR"),
-            Mode::Captain => f.write_str("Captain"),
-            Mode::Siege => f.write_str("Siege"),
-        }
+        let name = match self {
+            Mode::TD => "TD",
+            Mode::DM => "DM",
+            Mode::Chaser => "Chaser",
+            Mode::BR => "BR",
+            Mode::Captain => "Captain",
+            Mode::Siege => "Siege",
+        };
+
+        self.console_color().maybe_color().paint(name).fmt(f)
     }
 }
 
