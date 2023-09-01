@@ -41,6 +41,17 @@ impl Mode {
         .bold()
     }
 
+    pub fn name(&self) -> &str{
+        match self {
+            Mode::TD => "TD",
+            Mode::DM => "DM",
+            Mode::Chaser => "Chaser",
+            Mode::BR => "BR",
+            Mode::Captain => "Captain",
+            Mode::Siege => "Siege",
+        }
+    }
+
     pub fn next(&self) -> Self {
         match self {
             Mode::TD => Mode::DM,
@@ -51,6 +62,8 @@ impl Mode {
             Mode::Siege => Mode::TD,
         }
     }
+
+
 
     pub fn mode_discount(self, o: Self) -> f64 {
         let a = self.min(o);
@@ -104,16 +117,7 @@ impl TryInto<Mode> for &str {
 
 impl Display for Mode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let name = match self {
-            Mode::TD => "TD",
-            Mode::DM => "DM",
-            Mode::Chaser => "Chaser",
-            Mode::BR => "BR",
-            Mode::Captain => "Captain",
-            Mode::Siege => "Siege",
-        };
-
-        self.console_color().maybe_color().paint(name).fmt(f)
+        self.console_color().maybe_color().paint(self.name()).fmt(f)
     }
 }
 
