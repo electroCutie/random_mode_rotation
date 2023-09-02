@@ -65,13 +65,13 @@ fn print_map_choices(
     players: u16,
     random_maps: &[(f64, RcMap)],
 ) -> Result<(), Box<dyn Error>> {
-    let spaces:usize = usize::from(random_maps.len() > 9) + 1;
+    let spaces: usize = usize::from(random_maps.len() > 9) + 1;
 
     let print_map_choice = |idx: usize, random_maps: &[(f64, RcMap)]| {
         let (percent, map) = &random_maps[idx];
         println!(
             " ({}) {} ({}) {}",
-            choice(format!("{:>1$}", idx + 1, spaces)),
+            choice(format!("{: >1$}", idx + 1, spaces)),
             map.nickname,
             map.players,
             Style::new()
@@ -86,11 +86,12 @@ fn print_map_choices(
     for i in 0..random_maps.len() {
         print_map_choice(i, random_maps);
     }
-    println!(" ({:>1$}) Change Mode", choice('m'), spaces);
-    println!(" ({:>1$}) Set Players", choice('p'), spaces);
-    println!(" ({:>1$}) Show Map Percents", choice('%'), spaces);
-    println!(" ({:>1$}) Choose From All Maps", choice('a'), spaces);
-    println!(" ({:>1$}) Shuffle", choice('s'), spaces);
+    let space = " ".repeat(spaces - 1);
+    println!(" ({}{}) Change Mode", space, choice('m'));
+    println!(" ({}{}) Set Players", space, choice('p'));
+    println!(" ({}{}) Show Map Percents", space, choice('%'));
+    println!(" ({}{}) Choose From All Maps", space, choice('a'));
+    println!(" ({}{}) Shuffle", space, choice('s'));
     print_flush!("> ");
 
     Ok(())
@@ -265,11 +266,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut show_all_maps = false;
     // main loop
     loop {
-        let random_maps = 
-        if show_all_maps {
+        let random_maps = if show_all_maps {
             show_all_maps = false;
             build_scores(&log, mode, players, &all_maps)
-        }else{
+        } else {
             pick_random_maps(&log, mode, players, &all_maps, false)?
         };
         print_map_choices(mode, players, &random_maps)?;
