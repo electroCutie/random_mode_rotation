@@ -120,17 +120,26 @@ where
     read_until_valid(|response| f(response.chars().next()))
 }
 
-fn get_mode_action() -> Result<ModeAction, Box<dyn Error>> {
-    read_until_valid_char(|response| match response {
-        Some('1') => Ok(ModeAction::SelectMap(0)),
-        Some('2') => Ok(ModeAction::SelectMap(1)),
-        Some('3') => Ok(ModeAction::SelectMap(2)),
-        Some('m') => Ok(ModeAction::ChangeMode),
-        Some('p') => Ok(ModeAction::SetPlayerCt),
-        Some('%') => Ok(ModeAction::Percents),
-        Some('a') => Ok(ModeAction::AllMaps),
-        Some('s') => Ok(ModeAction::Shuffle),
-        _ => Err("bad response"),
+fn get_mode_action(map_ct: usize) -> Result<ModeAction, Box<dyn Error>> {
+    read_until_valid(|response| {
+        let numeric = response.parse::<usize>();
+        if let Ok(n) = numeric {
+            if n <= map_ct && n > 0 {
+                Ok(ModeAction::SelectMap(n - 1))
+            } else {
+                let err: String = format!("map selection {} out of range 1..{}", n, map_ct);
+                Err(err)
+            }
+        } else {
+            match response.as_str() {
+                "m" => Ok(ModeAction::ChangeMode),
+                "p" => Ok(ModeAction::SetPlayerCt),
+                "%" => Ok(ModeAction::Percents),
+                "a" => Ok(ModeAction::AllMaps),
+                "s" => Ok(ModeAction::Shuffle),
+                _ => Err("bad response".into()),
+            }
+        }
     })
 }
 
@@ -274,7 +283,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         };
         print_map_choices(mode, players, &random_maps)?;
 
-        match get_mode_action()? {
+        match get_mode_action(random_maps.len())? {
             ModeAction::SelectMap(n) => {
                 let map = random_maps.get(n).unwrap().1.clone();
                 append_log(map.as_ref())?;
