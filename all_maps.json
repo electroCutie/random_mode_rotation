@@ -217,7 +217,7 @@
         "gid": 32,
         "variants": [
             { "id": 53, "mode": "DM", "players": 16 },
-            { "id": 54, "mode": "Captain", "players": 12 }
+            { "id": 54, "mode": "Captain", "players": 16 }
         ]
     },{
         "name": "Data Harvest",
