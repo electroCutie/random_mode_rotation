@@ -277,7 +277,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     loop {
         let random_maps = if show_all_maps {
             show_all_maps = false;
-            build_scores(&log, mode, players, &all_maps)
+            build_scores(&log, mode, 0, &all_maps)
         } else {
             pick_random_maps(&log, mode, players, &all_maps, false)?
         };
