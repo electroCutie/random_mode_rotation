@@ -1,6 +1,6 @@
 use ansi_term::Style;
 use once_cell::sync::OnceCell;
-use std::{env, default};
+use std::env;
 
 static USE_COLOR: OnceCell<bool> = OnceCell::new();
 
@@ -29,7 +29,7 @@ where
         }
     }
 
-    fn without_color(self) -> Self{
+    fn without_color(self) -> Self {
         Self::default_color()
     }
 }

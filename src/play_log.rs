@@ -37,7 +37,10 @@ pub fn append_log(map: &Map) -> Result<(), Box<dyn Error>> {
 
     f.write_fmt(format_args!(
         "#{} ({}) {} {}\n",
-        map.id, now, map.nickname, map.mode.name()
+        map.id,
+        now,
+        map.nickname,
+        map.mode.name()
     ))?;
 
     Ok(())

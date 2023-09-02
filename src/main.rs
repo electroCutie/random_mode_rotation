@@ -1,4 +1,5 @@
 use std::{
+    cmp::Ordering,
     collections::HashMap,
     error::Error,
     fmt::{Debug, Display},
@@ -24,6 +25,7 @@ enum ModeAction {
     SelectMap(usize),
     ChangeMode,
     SetPlayerCt,
+    Percents,
     Shuffle,
 }
 
@@ -83,6 +85,7 @@ fn print_map_choices(
     print_map_choice(2, random_maps);
     println!(" ({}) Change Mode", choice('m'));
     println!(" ({}) Set Players", choice('p'));
+    println!(" ({}) Show Map Percents", choice('%'));
     println!(" ({}) Shuffle", choice('s'));
     print_flush!("> ");
 
@@ -119,6 +122,7 @@ fn get_mode_action() -> Result<ModeAction, Box<dyn Error>> {
         Some('3') => Ok(ModeAction::SelectMap(2)),
         Some('m') => Ok(ModeAction::ChangeMode),
         Some('p') => Ok(ModeAction::SetPlayerCt),
+        Some('%') => Ok(ModeAction::Percents),
         Some('s') => Ok(ModeAction::Shuffle),
         _ => Err("bad response"),
     })
@@ -152,6 +156,10 @@ fn prompt_for_mode() -> Result<Option<Mode>, Box<dyn Error>> {
         Some('c') => Ok(None),
         _ => Err("bad response"),
     })
+}
+
+fn sort_score<T>(a: &(f64, T), b: &(f64, T)) -> Ordering {
+    a.0.partial_cmp(&b.0).unwrap().reverse()
 }
 
 fn pick_random_maps(
@@ -195,9 +203,34 @@ fn pick_random_maps(
         }
     }
 
-    random_maps.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap().reverse());
+    random_maps.sort_unstable_by(sort_score);
 
     Ok(random_maps)
+}
+
+fn print_all_maps_for_mode(log: &[RcMap], all_maps: &[RcMap]) -> Result<(), Box<dyn Error>> {
+    if let Some(mode) = prompt_for_mode()? {
+        let mut scores = build_scores(log, mode, 0, all_maps);
+        assert!(!scores.is_empty());
+        scores.sort_unstable_by(sort_score);
+
+        println!();
+        println!("All maps for {}", mode);
+        for (score, map) in scores {
+            println!(
+                "  {} ({}) {}",
+                map.nickname,
+                map.players,
+                Style::new()
+                    .italic()
+                    .maybe_color()
+                    .paint(format!("{:.2}%", score * 100.))
+            );
+        }
+        println!();
+    }
+
+    Ok(())
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -243,6 +276,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
             ModeAction::SetPlayerCt => players = prompt_for_player_ct()?,
+            ModeAction::Percents => print_all_maps_for_mode(&log, &all_maps)?,
             ModeAction::Shuffle => {} // No action required, just loop
         }
     }

@@ -41,7 +41,7 @@ impl Mode {
         .bold()
     }
 
-    pub fn name(&self) -> &str{
+    pub fn name(&self) -> &str {
         match self {
             Mode::TD => "TD",
             Mode::DM => "DM",
@@ -62,8 +62,6 @@ impl Mode {
             Mode::Siege => Mode::TD,
         }
     }
-
-
 
     pub fn mode_discount(self, o: Self) -> f64 {
         let a = self.min(o);
