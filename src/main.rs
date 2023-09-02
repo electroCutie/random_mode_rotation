@@ -28,6 +28,7 @@ enum ModeAction {
     Percents,
     AllMaps,
     Shuffle,
+    Quit,
 }
 
 macro_rules! print_flush {
@@ -92,6 +93,7 @@ fn print_map_choices(
     println!(" ({}{}) Show Map Percents", space, choice('%'));
     println!(" ({}{}) Choose From All Maps", space, choice('a'));
     println!(" ({}{}) Shuffle", space, choice('s'));
+    println!(" ({}{}) Quit", space, choice('q'));
     print_flush!("> ");
 
     Ok(())
@@ -137,6 +139,7 @@ fn get_mode_action(map_ct: usize) -> Result<ModeAction, Box<dyn Error>> {
                 "%" => Ok(ModeAction::Percents),
                 "a" => Ok(ModeAction::AllMaps),
                 "s" => Ok(ModeAction::Shuffle),
+                "q" => Ok(ModeAction::Quit),
                 _ => Err("bad response".into()),
             }
         }
@@ -300,6 +303,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             ModeAction::Percents => print_all_maps_for_mode(&log, &all_maps)?,
             ModeAction::AllMaps => show_all_maps = true,
             ModeAction::Shuffle => {} // No action required, just loop
+            ModeAction::Quit => return Ok(()),
         }
     }
 }
