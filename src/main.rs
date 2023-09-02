@@ -26,6 +26,7 @@ enum ModeAction {
     ChangeMode,
     SetPlayerCt,
     Percents,
+    AllMaps,
     Shuffle,
 }
 
@@ -64,11 +65,13 @@ fn print_map_choices(
     players: u16,
     random_maps: &[(f64, RcMap)],
 ) -> Result<(), Box<dyn Error>> {
-    fn print_map_choice(idx: usize, random_maps: &[(f64, RcMap)]) {
+    let spaces:usize = usize::from(random_maps.len() > 9) + 1;
+
+    let print_map_choice = |idx: usize, random_maps: &[(f64, RcMap)]| {
         let (percent, map) = &random_maps[idx];
         println!(
             " ({}) {} ({}) {}",
-            choice(idx + 1),
+            choice(format!("{:>1$}", idx + 1, spaces)),
             map.nickname,
             map.players,
             Style::new()
@@ -76,17 +79,18 @@ fn print_map_choices(
                 .maybe_color()
                 .paint(format!("{:.2}%", percent * 100.))
         );
-    }
+    };
 
     println!();
     println!("Mode {} for {} players", mode, players);
-    print_map_choice(0, random_maps);
-    print_map_choice(1, random_maps);
-    print_map_choice(2, random_maps);
-    println!(" ({}) Change Mode", choice('m'));
-    println!(" ({}) Set Players", choice('p'));
-    println!(" ({}) Show Map Percents", choice('%'));
-    println!(" ({}) Shuffle", choice('s'));
+    for i in 0..random_maps.len() {
+        print_map_choice(i, random_maps);
+    }
+    println!(" ({:>1$}) Change Mode", choice('m'), spaces);
+    println!(" ({:>1$}) Set Players", choice('p'), spaces);
+    println!(" ({:>1$}) Show Map Percents", choice('%'), spaces);
+    println!(" ({:>1$}) Choose From All Maps", choice('a'), spaces);
+    println!(" ({:>1$}) Shuffle", choice('s'), spaces);
     print_flush!("> ");
 
     Ok(())
@@ -123,6 +127,7 @@ fn get_mode_action() -> Result<ModeAction, Box<dyn Error>> {
         Some('m') => Ok(ModeAction::ChangeMode),
         Some('p') => Ok(ModeAction::SetPlayerCt),
         Some('%') => Ok(ModeAction::Percents),
+        Some('a') => Ok(ModeAction::AllMaps),
         Some('s') => Ok(ModeAction::Shuffle),
         _ => Err("bad response"),
     })
@@ -257,9 +262,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
     let mut players = 16u16;
 
+    let mut show_all_maps = false;
     // main loop
     loop {
-        let random_maps = pick_random_maps(&log, mode, players, &all_maps, false)?;
+        let random_maps = 
+        if show_all_maps {
+            show_all_maps = false;
+            build_scores(&log, mode, players, &all_maps)
+        }else{
+            pick_random_maps(&log, mode, players, &all_maps, false)?
+        };
         print_map_choices(mode, players, &random_maps)?;
 
         match get_mode_action()? {
@@ -277,6 +289,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
             ModeAction::SetPlayerCt => players = prompt_for_player_ct()?,
             ModeAction::Percents => print_all_maps_for_mode(&log, &all_maps)?,
+            ModeAction::AllMaps => show_all_maps = true,
             ModeAction::Shuffle => {} // No action required, just loop
         }
     }
