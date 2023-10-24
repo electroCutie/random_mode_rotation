@@ -431,5 +431,11 @@
         "variants": [
             { "id": 104, "mode": "Siege", "players": 16 }
         ]
+    },{
+        "name": "Terminal-109",
+        "gid": 65,
+        "variants": [
+            { "id": 107, "mode": "Siege", "players": 16 }
+        ]
     }
 ]
