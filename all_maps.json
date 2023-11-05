@@ -52,7 +52,7 @@
         "gid": 7,
         "variants": [
             { "id": 13, "mode": "TD", "players": 16 },
-            { "id": 14, "mode": "TD", "players": 16, "nickname": "Station-2 [Minecraft]" }
+            { "id": 14, "mode": "TD", "players": 16, "nickname": "Station-2 [Minecraft]", "gag": true }
         ]
     },{
         "name": "Max School",
