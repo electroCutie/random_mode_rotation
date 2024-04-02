@@ -38,7 +38,7 @@
         "variants": [
             { "id": 8, "mode": "TD", "players": 16 },
             { "id": 9, "mode": "DM", "players": 12 },
-            { "id": 10, "mode": "DM", "players": 12, "nickname": "Neden J" },
+            { "id": 10, "mode": "DM", "players": 12, "nickname": "Neden-J" },
             { "id": 11, "mode": "Captain", "players": 16 }
         ]
     },{
@@ -436,6 +436,13 @@
         "gid": 65,
         "variants": [
             { "id": 107, "mode": "Siege", "players": 16 }
+        ]
+    },{
+        "name": "Bamboo Forest",
+        "gid": 66,
+        "variants": [
+            { "id": 108, "mode": "DM", "players": 12 },
+            { "id": 109, "mode": "Chaser", "players": 12 }
         ]
     }
 ]
