@@ -39,6 +39,8 @@
             { "id": 8, "mode": "TD", "players": 16 },
             { "id": 9, "mode": "DM", "players": 12 },
             { "id": 10, "mode": "DM", "players": 12, "nickname": "Neden-J" },
+            { "id": 110, "mode": "DM", "players": 16, "nickname": "Neden-1 H" },
+            { "id": 111, "mode": "BR", "players": 16, "nickname": "Neden-1 H" },
             { "id": 11, "mode": "Captain", "players": 16 }
         ]
     },{
@@ -443,6 +445,12 @@
         "variants": [
             { "id": 108, "mode": "DM", "players": 12 },
             { "id": 109, "mode": "Chaser", "players": 12 }
+        ]
+    },{
+        "name": "Miniway",
+        "gid": 67,
+        "variants": [
+            { "id": 112, "mode": "TD", "players": 12 }
         ]
     }
 ]
