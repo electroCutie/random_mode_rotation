@@ -158,7 +158,8 @@
         "name": "Old School",
         "gid": 23,
         "variants": [
-            { "id": 38, "mode": "TD", "players": 16 }
+            { "id": 38, "mode": "TD", "players": 16 },
+            { "id": 113, "mode": "TD", "players": 16, "nickname": "Station-2 OS", "gag": true }
         ]
     },{
         "name": "Temple-M",
@@ -450,7 +451,7 @@
         "name": "Miniway",
         "gid": 67,
         "variants": [
-            { "id": 112, "mode": "TD", "players": 12 }
+            { "id": 112, "mode": "TD", "players": 16 }
         ]
     }
 ]
