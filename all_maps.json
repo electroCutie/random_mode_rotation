@@ -453,5 +453,20 @@
         "variants": [
             { "id": 112, "mode": "TD", "players": 16 }
         ]
+    },{
+        "name": "Mall",
+        "gid": 68,
+        "variants": [
+            { "id": 114, "mode": "TD", "players": 16 },
+            { "id": 115, "mode": "DM", "players": 16 },
+            { "id": 116, "mode": "BR", "players": 16 }
+        ]
+    },{
+        "name": "Courtyard",
+        "gid": 69,
+        "variants": [
+            { "id": 117, "mode": "DM", "players": 16 },
+            { "id": 118, "mode": "BR", "players": 16 }
+        ]
     }
 ]
